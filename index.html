@@ -1,34 +1,224 @@
 <!DOCTYPE html>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Notes page</title>
     
     <style>
-    	button {
-    		padding: 10px;
-    		width: 20%;
-    		float: left;
-    		border: 1 px solid #333;
-    		background: #eee;
+    
+    	* {
+ 			font-size: 100%;
+ 			font-family: Arial;
+ 			letter-spacing: 1px;
+		}
+    
+    	header {
+    		background-color: #ffffff; /* White */
     	}
+    	
+    	body {
+    		background-color: #6699ff; /* Blue */
+    	}
+    	
+    	p {
+    		text-align: center;
+    	}
+    	
+    	li {
+    		background-color: #ffffff; /* White */
+    		font-size: 16px;
+    		line-height: 2;
+    		text-align: center;
+    		list-style-type:none;
+    		border-bottom: 1px solid #ddd;
+    	} 
+    	
+    	button {
+    		background-color: #ffffff; /* White */
+    		border: none;
+    		color: black;
+    		padding: 15px 32px;
+    		text-align: center;
+    		text-decoration: none;
+    		display: inline-block;
+    		font-size: 16px;
+    	}
+    	
     	
     </style>
     
   </head>
   <body>
-  <h1>Notes</h1>
-    
-    
-    <button id="btn">Home</button>
-    <button id="btn">New Note</button>
-    <button id="btn">View Current</button>
+  
+  <header>
+  	<button id="viewList"><img src="images/view-list.png" 
+  			alt="View List" width="60" height="60"></button>
+    <button id="newNote"><img src="images/new-note.png" 
+    		alt="New Note" width="60" height="60" ></button>
+  </header>
 	
-	<ul id="Notes">
-		<li>note1</li>
-		<li>note2</li>
-		<li>note3</li>
-	</ul>
+  <article>
+  	<h2 id="currNote"></h2>
+  </article>
+	
+  <article>
+	<p id="textbox"></p>
+	<ul id="archivedNotes"></ul>
+  </article>
+	
+	<script>
+		(function(){
+			var viewListBtn = document.getElementById('viewList');
+			var newNoteBtn = document.getElementById('newNote');
+			var currNote = document.getElementById('currNote');
+			var viewBtn = document.createElement('button');
+			var editBtn = document.createElement('button');
+			var archivedNotes = document.getElementById('archivedNotes');
+			var archivedNoteCount = 1;
+			
+			var makeCurrentNote = function(){
+				var el = document.createElement('li');
+				el.textContent = "Current Note";
+				
+				viewBtn.textContent = "View";
+				editBtn.textContent = "Edit";
+				el.appendChild(viewBtn);
+				el.appendChild(editBtn);
+				
+				return el;
+			}
+		
+			var makeArchivedNote = function() {
+				var el = document.createElement('li');
+				el.textContent = "Note " + archivedNoteCount;
+				
+				var deleteBtn = document.createElement('button');
+				deleteBtn.setAttribute("number", archivedNoteCount);
+				deleteBtn.textContent = "delete";
+				deleteBtn.style.color = "red";
+				el.appendChild(deleteBtn);
+				deleteBtn.addEventListener('click', function() {
+					onDeleteNoteClick(deleteBtn.getAttribute("number"))
+				}, false);
+				
+				archivedNoteCount += 1;
+				
+				return el;
+			}
+			
+			/* 
+			* Decrements number values from their previous value 
+			* (keeps li numbers from name numbers)
+			* @param {Number} startpoint 
+			*/
+			var updateNumberValuesAfter = function(startpoint){
+			
+				for (var i = startpoint; i < archivedNotes.childElementCount; i++){
+					var currChildBtn = archivedNotes.childNodes[i].firstElementChild;
+					var btnNumberVal = currChildBtn.getAttribute("number");
+					currChildBtn.setAttribute("number", (btnNumberVal-1));
+				}
+			}
+			
+			var addToArchive = function(note){
+				archivedNotes.appendChild(note);
+			}
+			
+			var onNewNoteClick = function() {
+			
+				if(currNote.hasChildNodes()){
+					addToArchive(makeArchivedNote());
+				} else{
+					currNote.appendChild(makeCurrentNote());
+				}
+				
+				if($("textarea").length > 0){
+					closeTextBox();
+				} 
+				openTextBox();
+				hideNotes();
+				showTextBox();
+			}
+			
+			var onViewListClick = function(){
+				hideTextBox();
+				showNotes();
+			}
+			
+			var onViewNoteClick = function(){
+				showTextBox();
+				hideNotes();
+				setReadOnlyTrue();
+			}
+			
+			var onEditNoteClick = function(){
+				showTextBox();
+				hideNotes();
+				setReadOnlyFalse();
+			}
+			
+			var onDeleteNoteClick = function(number){
+				archivedNotes.removeChild(archivedNotes.childNodes[number-1]);
+				updateNumberValuesAfter(number-1);
+			}
+			
+			var setReadOnlyTrue = function(){
+				var textArea = document.getElementById("textbox").childNodes[0];
+				textArea.readOnly = true;
+			}
+			
+			var setReadOnlyFalse = function(){
+				var textArea = document.getElementById("textbox").childNodes[0];
+				textArea.readOnly = false;
+			}
+			
+			var openTextBox = function(){
+				var div = document.getElementById("textbox");
+				var input = document.createElement("textarea");
+				input.name = "textArea";
+				input.maxLength = "5000";
+				input.cols = "80";
+				input.rows = "40";
+				div.appendChild(input); 
+			}
+			
+			var closeTextBox = function(){
+				var div = document.getElementById("textbox");
+				div.removeChild(div.childNodes[0]);
+			}
+			
+			var showTextBox = function(){
+				$("#textbox").show();
+			}			
+			
+			var hideTextBox = function(){
+				$("#textbox").hide();
+			}
+			
+			var showNotes = function(){
+				$("#currNote").show();
+				$("#archivedNotes").show();
+			}			
+			
+			var hideNotes = function(){
+				$("#currNote").hide();
+				$("#archivedNotes").hide();
+			}
+			
+			newNoteBtn.addEventListener('click', onNewNoteClick);
+			viewListBtn.addEventListener('click',  function() {
+					onViewListClick()
+				}, false);
+			viewBtn.addEventListener('click',  function() {
+					onViewNoteClick()
+				}, false);
+			editBtn.addEventListener('click',  function() {
+					onEditNoteClick()
+				}, false);
+			
+		}());
+	</script>
     
     
   </body>
