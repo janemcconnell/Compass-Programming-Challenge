@@ -76,6 +76,7 @@
 			var editBtn = document.createElement('button');
 			var archivedNotes = document.getElementById('archivedNotes');
 			var archivedNoteCount = 1;
+			var deletedNoteCount = 0; 
 			
 			var makeCurrentNote = function(){
 				var el = document.createElement('li');
@@ -94,7 +95,8 @@
 				el.textContent = "Note " + archivedNoteCount;
 				
 				var deleteBtn = document.createElement('button');
-				deleteBtn.setAttribute("number", archivedNoteCount);
+				// "number" value != li value
+				deleteBtn.setAttribute("number", (archivedNoteCount - deletedNoteCount));
 				deleteBtn.textContent = "delete";
 				deleteBtn.style.color = "red";
 				el.appendChild(deleteBtn);
@@ -109,7 +111,7 @@
 			
 			/* 
 			* Decrements number values from their previous value 
-			* (keeps li numbers from name numbers)
+			* (keeps li numbers separate from name numbers)
 			* @param {Number} startpoint 
 			*/
 			var updateNumberValuesAfter = function(startpoint){
@@ -161,6 +163,7 @@
 			var onDeleteNoteClick = function(number){
 				archivedNotes.removeChild(archivedNotes.childNodes[number-1]);
 				updateNumberValuesAfter(number-1);
+				deletedNoteCount += 1;
 			}
 			
 			var setReadOnlyTrue = function(){
@@ -207,15 +210,9 @@
 			}
 			
 			newNoteBtn.addEventListener('click', onNewNoteClick);
-			viewListBtn.addEventListener('click',  function() {
-					onViewListClick()
-				}, false);
-			viewBtn.addEventListener('click',  function() {
-					onViewNoteClick()
-				}, false);
-			editBtn.addEventListener('click',  function() {
-					onEditNoteClick()
-				}, false);
+			viewListBtn.addEventListener('click', onViewListClick);
+			viewBtn.addEventListener('click', onViewNoteClick);
+			editBtn.addEventListener('click', onEditNoteClick);
 			
 		}());
 	</script>
